@@ -1,4 +1,4 @@
-package com.example.projectproduit.data
+package com.example.projectproduit.data.entities
 
 data class Product(
     val productId: String,
