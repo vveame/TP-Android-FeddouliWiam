@@ -7,11 +7,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
+import com.example.projectproduit.ui.product.ProductViewModel
 import com.example.projectproduit.ui.product.component.ProductDetails
 import com.example.projectproduit.ui.product.screen.ProductHomeScreen
 
@@ -21,7 +23,7 @@ object Routes {
 }
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(viewModel: ProductViewModel) {
     val navController = rememberNavController()
 
     Scaffold { paddingValues ->
@@ -37,6 +39,7 @@ fun AppNavigation() {
             ) {
                 composable(Routes.Home) {
                     ProductHomeScreen(
+                        viewModel = viewModel,
                         onNavigateToDetails = { productId ->
                             navController.navigate("${Routes.ProductDetails}/$productId")
                         }

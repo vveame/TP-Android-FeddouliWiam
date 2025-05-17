@@ -1,6 +1,5 @@
 package com.example.projectproduit.ui.product.screen
 
-import android.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,7 +19,7 @@ import com.example.projectproduit.ui.product.component.ProductList
 import androidx.compose.runtime.getValue
 
 @Composable
-fun ProductHomeScreen(viewModel: ProductViewModel = viewModel(), onNavigateToDetails: (String) -> Unit) {
+fun ProductHomeScreen(viewModel: ProductViewModel, onNavigateToDetails: (String) -> Unit) {
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel) {

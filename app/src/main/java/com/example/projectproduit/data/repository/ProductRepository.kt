@@ -2,10 +2,11 @@ package com.example.projectproduit.data.repository
 
 import com.example.projectproduit.data.entities.Product
 import com.example.projectproduit.R
+import jakarta.inject.Inject
 import kotlinx.coroutines.delay
 
 
-class ProductRepository {
+class ProductRepository @Inject constructor() {
     suspend fun getProducts(): List<Product> {
         delay(2000)
         return listOf(
