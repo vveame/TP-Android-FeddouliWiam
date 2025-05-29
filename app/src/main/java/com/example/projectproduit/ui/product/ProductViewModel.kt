@@ -1,5 +1,6 @@
 package com.example.projectproduit.ui.product
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.projectproduit.data.repository.ProductRepository
@@ -30,9 +31,11 @@ class ProductViewModel @Inject constructor(
     private suspend fun loadProducts() {
         _state.value = _state.value.copy(isLoading = true, error = null)
         try {
+            Log.d("products repo", "loadProducts")
             val products = repository.getProducts()
             _state.value = ProductViewState(isLoading = false, products = products)
         } catch (e: Exception) {
+            Log.d("products repo", "Exception")
             _state.value =
                 ProductViewState(isLoading = false, error = e.message ?: "Error fetching products")
         }
