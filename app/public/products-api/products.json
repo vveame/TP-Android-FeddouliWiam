@@ -1,0 +1,37 @@
+[
+  {
+    "ID": "1",
+    "Title": "Clavier Gamer",
+    "Price": 300.0,
+    "Quantity": 4,
+    "Image": "clavier"
+  },
+  {
+    "ID": "2",
+    "Title": "Souris Logitech",
+    "Price": 150.5,
+    "Quantity": 0,
+    "Image": "souris"
+  },
+  {
+    "ID": "3",
+    "Title": "Écran 24",
+    "Price": 1200.0,
+    "Quantity": 100,
+    "Image": "ecran"
+  },
+  {
+    "ID": "4",
+    "Title": "Ordinateur Portable",
+    "Price": 7000.0,
+    "Quantity": 2000,
+    "Image": "laptop"
+  },
+  {
+    "ID": "5",
+    "Title": "Tapis de souris",
+    "Price": 40.0,
+    "Quantity": 40,
+    "Image": "tapis"
+  }
+]
