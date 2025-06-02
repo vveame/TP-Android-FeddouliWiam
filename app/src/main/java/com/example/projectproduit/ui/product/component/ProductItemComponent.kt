@@ -24,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.projectproduit.data.entities.Product
 
 @Composable
@@ -54,8 +55,8 @@ fun ProductItem(product: Product, onNavigateToDetails: (String) -> Unit ){
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = painterResource(id = product.productImage),
+                AsyncImage(
+                    model = product.productImage,
                     contentDescription = product.productTitle,
                     modifier = Modifier
                         .size(80.dp)

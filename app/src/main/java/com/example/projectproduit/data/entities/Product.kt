@@ -16,5 +16,5 @@ data class Product(
     val productQuantity: Int,
 
     @SerializedName("Image")
-    val productImage: Int
+    val productImage: String
 )

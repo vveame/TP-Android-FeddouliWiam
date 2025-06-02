@@ -17,7 +17,7 @@ class ProductRepository @Inject constructor(
     }
 
     suspend fun getProductById(id: String): Product? {
-        val products = getProducts()
+        val products = api.getProducts()
         return products.find { it.productId == id }
     }
 }

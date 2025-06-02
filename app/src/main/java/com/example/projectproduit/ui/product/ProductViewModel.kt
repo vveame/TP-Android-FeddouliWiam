@@ -25,6 +25,9 @@ class ProductViewModel @Inject constructor(
                     loadProducts()
                 }
             }
+            is ProductIntent.LoadProductById -> {
+                viewModelScope.launch { loadProductById(intent.id) }
+            }
         }
     }
 
@@ -36,6 +39,19 @@ class ProductViewModel @Inject constructor(
             _state.value = ProductViewState(isLoading = false, products = products)
         } catch (e: Exception) {
             Log.d("products repo", "Exception")
+            _state.value =
+                ProductViewState(isLoading = false, error = e.message ?: "Error fetching products")
+        }
+    }
+
+    private suspend fun loadProductById(id: String){
+        _state.value = _state.value.copy(isLoading = true, error = null)
+        try {
+            Log.d("product repo", "loadProductById")
+            val product = repository.getProductById(id)
+            _state.value = ProductViewState(isLoading = false, selectedProduct = product)
+        } catch (e: Exception) {
+            Log.d("product repo", "Exception")
             _state.value =
                 ProductViewState(isLoading = false, error = e.message ?: "Error fetching products")
         }

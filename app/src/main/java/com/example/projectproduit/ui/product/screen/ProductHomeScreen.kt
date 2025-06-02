@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.projectproduit.ui.product.ProductIntent
 import com.example.projectproduit.ui.product.ProductViewModel
 import com.example.projectproduit.ui.product.component.ProductList
