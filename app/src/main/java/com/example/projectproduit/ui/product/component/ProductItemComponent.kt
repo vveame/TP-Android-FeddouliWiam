@@ -1,6 +1,5 @@
 package com.example.projectproduit.ui.product.component
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -28,9 +26,9 @@ import coil.compose.AsyncImage
 import com.example.projectproduit.data.entities.Product
 
 @Composable
-fun ProductItem(product: Product, onNavigateToDetails: (String) -> Unit ){
-    val isOutOfStock = product.productQuantity <= 0
-    val isLowStock = product.productQuantity in 1..9
+fun ProductItem(product: Product, onNavigateToDetails: (String) -> Unit) {
+    val isOutOfStock = product.productStock <= 0
+    val isLowStock = product.productStock in 1..9
 
     val clickHandler: () -> Unit = if (!isOutOfStock) {
         { onNavigateToDetails(product.productId) }
@@ -56,7 +54,7 @@ fun ProductItem(product: Product, onNavigateToDetails: (String) -> Unit ){
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(
-                    model = product.productImage,
+                    model = product.productThumbnail,
                     contentDescription = product.productTitle,
                     modifier = Modifier
                         .size(80.dp)
@@ -78,13 +76,35 @@ fun ProductItem(product: Product, onNavigateToDetails: (String) -> Unit ){
                         color = if (isOutOfStock) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         else MaterialTheme.colorScheme.onSurface
                     )
+
                     Spacer(modifier = Modifier.height(4.dp))
+
+                    val discount = product.discountPercentage ?: 0.0
+                    val finalPrice = product.productPrice * (1 - discount / 100)
+
                     Text(
-                        text = "${"%.2f".format(product.productPrice)} DH",
+                        text = "$ ${"%.2f".format(finalPrice)}",
                         style = MaterialTheme.typography.titleSmall,
                         color = if (isOutOfStock) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                         else MaterialTheme.colorScheme.primary
                     )
+
+                    if (discount > 0) {
+                        Text(
+                            text = "(-${discount.toInt()}%)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
+
+                    product.productRating?.let { rating ->
+                        Text(
+                            text = "⭐ %.1f".format(rating),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
                 }
             }
 

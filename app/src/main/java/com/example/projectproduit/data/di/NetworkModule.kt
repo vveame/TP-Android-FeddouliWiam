@@ -17,7 +17,7 @@ import javax.inject.Singleton
 object NetworkModule {
 
     @Provides
-    fun provideBaseUrl(): String = "https://raw.githubusercontent.com/vveame/TP-Android-FeddouliWiam/refs/heads/main/app/public/products-api/"
+    fun provideBaseUrl(): String = "https://raw.githubusercontent.com/vveame/TP-Android-FeddouliWiam/refs/heads/final/app/public/data/"
 
     @Provides
     @Singleton

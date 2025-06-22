@@ -21,7 +21,7 @@ fun ProductList(products: List<Product>, onNavigateToDetails: (String) -> Unit){
             .padding(horizontal = 16.dp)
     ) {
         Text(
-            text = "Liste des produits",
+            text = "Products List",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(vertical = 16.dp)
         )

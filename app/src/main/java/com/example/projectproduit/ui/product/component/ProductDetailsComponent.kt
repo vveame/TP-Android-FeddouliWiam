@@ -33,7 +33,7 @@ fun ProductDetails(
 ) {
     val state by viewModel.state.collectAsState()
 
-    // Charger le produit par ID une seule fois
+    // Load product by ID once
     LaunchedEffect(productId) {
         viewModel.handleIntent(ProductIntent.LoadProductById(productId))
     }
@@ -52,7 +52,7 @@ fun ProductDetails(
 
             state.error != null -> {
                 Text(
-                    text = "Erreur : ${state.error}",
+                    text = "Error : ${state.error}",
                     color = androidx.compose.ui.graphics.Color.Red
                 )
             }
@@ -62,7 +62,7 @@ fun ProductDetails(
 
                 // Image
                 AsyncImage(
-                    model = product.productImage,
+                    model = product.productThumbnail,
                     contentDescription = product.productTitle,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -73,7 +73,7 @@ fun ProductDetails(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Détails du produit
+                // Product details
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = product.productTitle,
@@ -83,23 +83,64 @@ fun ProductDetails(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    // Price with discount if available
+                    val discount = product.discountPercentage ?: 0.0
+                    val finalPrice = product.productPrice * (1 - discount / 100)
                     Text(
-                        text = "${"%.2f".format(product.productPrice)} DH",
+                        text = "$ ${"%.2f".format(finalPrice)}",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
+                    if (discount > 0) {
+                        Text(
+                            text = "(-${discount.toInt()}%)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
+                    // Stock info
                     Row {
                         Text(
-                            text = "En stock : ",
+                            text = "In stock : ",
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
-                            text = product.productQuantity.toString(),
+                            text = product.productStock.toString(),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Optional description
+                    product.productDescription?.let { description ->
+                        Text(
+                            text = description,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    // Brand and category
+                    Text(
+                        text = "Brand : ${product.productBrand}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "Category : ${product.productCategory}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    // Rating if available
+                    product.productRating?.let { rating ->
+                        Text(
+                            text = "⭐ %.1f".format(rating),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(top = 8.dp)
                         )
                     }
 
@@ -111,7 +152,7 @@ fun ProductDetails(
                             .fillMaxWidth()
                             .padding(top = 16.dp)
                     ) {
-                        Text("Retour aux produits")
+                        Text("Back to products")
                     }
                 }
             }
