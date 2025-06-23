@@ -31,7 +31,7 @@ fun ProductHomeScreen(
     selectedCategory: String? = null,
     selectedBrand: String? = null,
     onNavigateToDetails: (String) -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
 ) {
     val state by viewModel.state.collectAsState()
     var searchQuery by remember { mutableStateOf("") }

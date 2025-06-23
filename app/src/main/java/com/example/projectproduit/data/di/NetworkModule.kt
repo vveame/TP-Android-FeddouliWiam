@@ -1,5 +1,6 @@
 package com.example.projectproduit.data.di
 
+import com.example.projectproduit.data.api.OrderApi
 import com.example.projectproduit.data.api.ProductApi
 import dagger.Module
 import dagger.Provides
@@ -39,4 +40,8 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideProductApi(retrofit: Retrofit): ProductApi = retrofit.create(ProductApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideOrderApi(retrofit: Retrofit): OrderApi = retrofit.create(OrderApi::class.java)
 }

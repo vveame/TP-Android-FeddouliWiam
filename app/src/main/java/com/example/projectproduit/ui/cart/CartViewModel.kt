@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
 class CartViewModel : ViewModel() {
+
     private val _state = MutableStateFlow(CartViewState())
     val state: StateFlow<CartViewState> = _state
 

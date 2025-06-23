@@ -19,6 +19,7 @@ import androidx.navigation.navArgument
 import com.example.projectproduit.R
 import com.example.projectproduit.ui.cart.CartViewModel
 import com.example.projectproduit.ui.cart.screen.CartScreen
+import com.example.projectproduit.ui.order.OrderViewModel
 import com.example.projectproduit.ui.product.ProductViewModel
 import com.example.projectproduit.ui.product.component.ProductDetails
 import com.example.projectproduit.ui.product.screen.ProductHomeScreen
@@ -33,7 +34,7 @@ object Routes {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(viewModel: ProductViewModel, cartViewModel: CartViewModel) {
+fun AppNavigation(viewModel: ProductViewModel, cartViewModel: CartViewModel, orderViewModel: OrderViewModel) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -216,7 +217,9 @@ fun AppNavigation(viewModel: ProductViewModel, cartViewModel: CartViewModel) {
                     )
                 }
                 composable(Routes.Cart) {
-                    CartScreen(viewModel = cartViewModel)
+                    CartScreen(viewModel = cartViewModel,
+                        userId = "test-user-id", // Replace with real logged-in user ID
+                        orderViewModel = orderViewModel )
                 }
                 composable(Routes.Profile) {
                     Text("Profile Screen (to implement)", Modifier.padding(16.dp))

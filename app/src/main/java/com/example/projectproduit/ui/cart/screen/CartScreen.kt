@@ -1,5 +1,6 @@
 package com.example.projectproduit.ui.cart.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,15 +22,34 @@ import androidx.compose.ui.unit.dp
 import com.example.projectproduit.ui.cart.CartViewModel
 import com.example.projectproduit.ui.cart.CartIntent
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import com.example.projectproduit.data.entities.Address
+import com.example.projectproduit.data.entities.Order
+import com.example.projectproduit.data.entities.OrderItem
+import com.example.projectproduit.data.entities.OrderStatus
+import com.example.projectproduit.data.entities.PaymentMethod
 import com.example.projectproduit.ui.cart.component.CartItem
+import com.example.projectproduit.ui.order.OrderIntent
+import com.example.projectproduit.ui.order.OrderViewModel
+import kotlinx.coroutines.launch
+import java.util.Date
+import java.util.UUID
 
 @Composable
-fun CartScreen(viewModel: CartViewModel) {
-    val state by viewModel.state.collectAsState()
+fun CartScreen(viewModel: CartViewModel,
+               userId: String,
+               orderViewModel: OrderViewModel) {
+
+    val cartState by viewModel.state.collectAsState()
+    val orderState by orderViewModel.state.collectAsState()
+
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        if (state.items.isEmpty()) {
+        if (cartState.items.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -38,8 +58,8 @@ fun CartScreen(viewModel: CartViewModel) {
             }
         } else {
             LazyColumn(modifier = Modifier.weight(1f)) {
-                items(state.items.size) { index ->
-                    val item = state.items[index]
+                items(cartState.items.size) { index ->
+                    val item = cartState.items[index]
                     CartItem(
                         item = item,
                         onRemove = { viewModel.onIntent(CartIntent.RemoveFromCart(item.product.productId)) },
@@ -57,7 +77,7 @@ fun CartScreen(viewModel: CartViewModel) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Total: $ ${"%.2f".format(state.totalPrice)}", style = MaterialTheme.typography.headlineSmall)
+            Text("Total: $ ${"%.2f".format(cartState.totalPrice)}", style = MaterialTheme.typography.headlineSmall)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -73,8 +93,36 @@ fun CartScreen(viewModel: CartViewModel) {
                 }
 
                 Button(
-                    onClick = { /* Handle checkout action */ },
-                    enabled = state.items.isNotEmpty()
+                    onClick = {
+                        val orderItems = cartState.items.map {
+                            OrderItem(
+                                product = it.product,
+                                quantity = it.quantity,
+                                unitPrice = it.product.productPrice * (1 - (it.product.discountPercentage ?: 0.0) / 100),
+                                discountApplied = it.product.discountPercentage ?: 0.0
+                            )
+                        }
+
+                        val order = Order(
+                            orderId = UUID.randomUUID().toString(),
+                            orderDate = Date(),
+                            items = orderItems,
+                            totalAmount = cartState.totalPrice,
+                            shippingFee = 0.0,
+                            deliveryAddress = Address("Street X", "City", "00000", "Country"), // Replace with real or input
+                            paymentMethod = PaymentMethod.CASH_ON_DELIVERY,
+                            userId = "678auna",
+                            status = OrderStatus.PENDING
+                        )
+
+                        coroutineScope.launch {
+                            orderViewModel.onIntent(OrderIntent.PlaceOrder(order))
+                            viewModel.onIntent(CartIntent.ClearCart)
+
+                            Toast.makeText(context, "Order placed successfully", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    enabled = cartState.items.isNotEmpty()
                 ) {
                     Text("Checkout")
                 }
