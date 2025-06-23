@@ -62,13 +62,13 @@ fun CartScreen(viewModel: CartViewModel,
                     val item = cartState.items[index]
                     CartItem(
                         item = item,
-                        onRemove = { viewModel.onIntent(CartIntent.RemoveFromCart(item.product.productId)) },
+                        onRemove = { viewModel.onIntent(CartIntent.RemoveFromCart(item.product.id)) },
                         onQuantityChange = { qty ->
                             viewModel.onIntent(
                                 if (qty > 0)
-                                    CartIntent.ChangeQuantity(item.product.productId, qty)
+                                    CartIntent.ChangeQuantity(item.product.id, qty)
                                 else
-                                    CartIntent.RemoveFromCart(item.product.productId)
+                                    CartIntent.RemoveFromCart(item.product.id)
                             )
                         }
                     )
@@ -98,7 +98,7 @@ fun CartScreen(viewModel: CartViewModel,
                             OrderItem(
                                 product = it.product,
                                 quantity = it.quantity,
-                                unitPrice = it.product.productPrice * (1 - (it.product.discountPercentage ?: 0.0) / 100),
+                                unitPrice = it.product.price * (1 - (it.product.discountPercentage ?: 0.0) / 100),
                                 discountApplied = it.product.discountPercentage ?: 0.0
                             )
                         }

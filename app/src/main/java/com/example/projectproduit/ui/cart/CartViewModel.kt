@@ -16,7 +16,7 @@ class CartViewModel : ViewModel() {
         when (intent) {
             is CartIntent.AddToCart -> {
                 val updatedItems = _state.value.items.toMutableList()
-                val index = updatedItems.indexOfFirst { it.product.productId == intent.product.productId }
+                val index = updatedItems.indexOfFirst { it.product.id == intent.product.id }
                 if (index != -1) {
                     updatedItems[index] = updatedItems[index].copy(quantity = updatedItems[index].quantity + 1)
                 } else {
@@ -26,13 +26,13 @@ class CartViewModel : ViewModel() {
             }
 
             is CartIntent.RemoveFromCart -> {
-                val updatedItems = _state.value.items.filterNot { it.product.productId == intent.productId }
+                val updatedItems = _state.value.items.filterNot { it.product.id == intent.productId }
                 updateState(updatedItems)
             }
 
             is CartIntent.ChangeQuantity -> {
                 val updatedItems = _state.value.items.mapNotNull {
-                    if (it.product.productId == intent.productId) {
+                    if (it.product.id == intent.productId) {
                         if (intent.quantity > 0) it.copy(quantity = intent.quantity) else null
                     } else it
                 }
@@ -52,6 +52,6 @@ class CartViewModel : ViewModel() {
 
     private fun getDiscountedPrice(product: Product): Double {
         val discount = product.discountPercentage ?: 0.0
-        return product.productPrice * (1 - discount / 100)
+        return product.price * (1 - discount / 100)
     }
 }

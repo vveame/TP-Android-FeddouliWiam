@@ -38,11 +38,11 @@ fun ProductItem(
     onNavigateToDetails: (String) -> Unit
 ) {
 
-    val isOutOfStock = product.productStock <= 0
-    val isLowStock = product.productStock in 1..9
+    val isOutOfStock = product.stock <= 0
+    val isLowStock = product.stock in 1..9
 
     val clickHandler: () -> Unit = if (!isOutOfStock) {
-        { onNavigateToDetails(product.productId) }
+        { onNavigateToDetails(product.id) }
     } else {
         { }
     }
@@ -65,8 +65,8 @@ fun ProductItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(
-                    model = product.productThumbnail,
-                    contentDescription = product.productTitle,
+                    model = product.thumbnail,
+                    contentDescription = product.title,
                     modifier = Modifier
                         .size(80.dp)
                         .clip(RoundedCornerShape(8.dp)),
@@ -79,7 +79,7 @@ fun ProductItem(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = product.productTitle,
+                        text = product.title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
@@ -91,7 +91,7 @@ fun ProductItem(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     val discount = product.discountPercentage ?: 0.0
-                    val finalPrice = product.productPrice * (1 - discount / 100)
+                    val finalPrice = product.price * (1 - discount / 100)
 
                     Text(
                         text = "$ ${"%.2f".format(finalPrice)}",
@@ -109,13 +109,11 @@ fun ProductItem(
                         )
                     }
 
-                    product.productRating?.let { rating ->
-                        Text(
-                            text = "⭐ %.1f".format(rating),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 2.dp)
-                        )
-                    }
+                    Text(
+                        text = "⭐ %.1f".format(product.rating),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
                 }
             }
 

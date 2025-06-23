@@ -74,11 +74,11 @@ fun ProductHomeScreen(
                 )
 
                 val filteredProducts = state.products.filter { product ->
-                    val matchesCategory = selectedCategory == null || selectedCategory == "All" || product.productCategory == selectedCategory
-                    val matchesBrand = selectedBrand == null || selectedBrand == "All" || product.productBrand == selectedBrand
-                    val matchesSearch = searchQuery.isBlank() || product.productTitle.contains(searchQuery, ignoreCase = true) ||
-                            product.productCategory.contains(searchQuery, ignoreCase = true) ||
-                            product.productBrand.contains(searchQuery, ignoreCase = true)
+                    val matchesCategory = selectedCategory == null || selectedCategory == "All" || product.category == selectedCategory
+                    val matchesBrand = selectedBrand == null || selectedBrand == "All" || product.brand == selectedBrand
+                    val matchesSearch = searchQuery.isBlank() || product.title.contains(searchQuery, ignoreCase = true) ||
+                            product.category.contains(searchQuery, ignoreCase = true) ||
+                            product.brand.contains(searchQuery, ignoreCase = true)
 
                     matchesCategory && matchesBrand && matchesSearch
                 }

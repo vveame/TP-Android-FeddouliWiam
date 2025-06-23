@@ -27,7 +27,7 @@ fun CartItem(
     onRemove: () -> Unit,
     onQuantityChange: (Int) -> Unit
 ) {
-    val discountedPrice = item.product.productPrice * (1 - (item.product.discountPercentage ?: 0.0) / 100)
+    val discountedPrice = item.product.price * (1 - (item.product.discountPercentage ?: 0.0) / 100)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -35,24 +35,24 @@ fun CartItem(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
-            Text(text = item.product.productTitle, style = MaterialTheme.typography.titleMedium)
+            Text(text = item.product.title, style = MaterialTheme.typography.titleMedium)
 
             Row {
-                if (item.product.discountPercentage != null && item.product.discountPercentage > 0.0) {
+                if (item.product.discountPercentage!! > 0.0) {
                     Text(
-                        text = "${"%.2f".format(discountedPrice)} DH",
+                        text = "$ ${"%.2f".format(discountedPrice)}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "${"%.2f".format(item.product.productPrice)} DH",
+                        text = "$ ${"%.2f".format(item.product.price)}",
                         style = MaterialTheme.typography.bodySmall.copy(textDecoration = TextDecoration.LineThrough),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
                     Text(
-                        text = "${"%.2f".format(item.product.productPrice)} DH",
+                        text = "$ ${"%.2f".format(item.product.price)}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

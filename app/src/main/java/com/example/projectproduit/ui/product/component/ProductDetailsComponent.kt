@@ -69,7 +69,7 @@ fun ProductDetails(
 
                 // Image
                 ProductImageSlider(
-                    images = product.productImages.takeIf { it.isNotEmpty() } ?: listOf(product.productThumbnail)
+                    images = product.images.takeIf { it.isNotEmpty() } ?: listOf(product.thumbnail)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -77,7 +77,7 @@ fun ProductDetails(
                 // Product details
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = product.productTitle,
+                        text = product.title,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -86,7 +86,7 @@ fun ProductDetails(
 
                     // Price with discount if available
                     val discount = product.discountPercentage ?: 0.0
-                    val finalPrice = product.productPrice * (1 - discount / 100)
+                    val finalPrice = product.price * (1 - discount / 100)
                     Text(
                         text = "$ ${"%.2f".format(finalPrice)}",
                         style = MaterialTheme.typography.titleLarge,
@@ -109,7 +109,7 @@ fun ProductDetails(
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
-                            text = product.productStock.toString(),
+                            text = product.stock.toString(),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -118,7 +118,7 @@ fun ProductDetails(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     // Optional description
-                    product.productDescription?.let { description ->
+                    product.description?.let { description ->
                         Text(
                             text = description,
                             style = MaterialTheme.typography.bodyMedium
@@ -128,22 +128,20 @@ fun ProductDetails(
 
                     // Brand and category
                     Text(
-                        text = "Brand : ${product.productBrand}",
+                        text = "Brand : ${product.brand}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = "Category : ${product.productCategory}",
+                        text = "Category : ${product.category}",
                         style = MaterialTheme.typography.bodyMedium
                     )
 
                     // Rating if available
-                    product.productRating?.let { rating ->
-                        Text(
-                            text = "⭐ %.1f".format(rating),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
+                    Text(
+                        text = "⭐ %.1f".format(product.rating),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
 
                     Spacer(modifier = Modifier.weight(1f))
 

@@ -40,8 +40,8 @@ fun AppNavigation(viewModel: ProductViewModel, cartViewModel: CartViewModel, ord
     val scope = rememberCoroutineScope()
 
     val state by viewModel.state.collectAsState()
-    val categories = state.products.map { it.productCategory }.distinct().sorted()
-    val brands = state.products.map { it.productBrand }.distinct().sorted()
+    val categories = state.products.map { it.category }.distinct().sorted()
+    val brands = state.products.map { it.brand }.distinct().sorted()
 
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedBrand by rememberSaveable { mutableStateOf<String?>(null) }

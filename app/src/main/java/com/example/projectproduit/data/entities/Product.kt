@@ -5,38 +5,38 @@ import java.util.Date
 
 data class Product(
     @SerializedName("id")
-    val productId: String,
+    var id: String = "",
 
     @SerializedName("title")
-    val productTitle: String,
+    var title: String = "",
 
     @SerializedName("description")
-    val productDescription: String?,
+    var description: String? = null,
 
     @SerializedName("price")
-    val productPrice: Double,
+    var price: Double = 0.0,
 
     @SerializedName("discountPercentage")
-    val discountPercentage: Double?,
+    var discountPercentage: Double? = null,
 
     @SerializedName("rating")
-    val productRating: Double?,
+    var rating: Double? = null,
 
     @SerializedName("stock")
-    val productStock: Int,
+    var stock: Int = 0,
 
     @SerializedName("restockDate")
-    val restockDate: Date?,
+    var restockDate: Date? = null,
 
     @SerializedName("brand")
-    val productBrand: String,
+    var brand: String = "",
 
     @SerializedName("category")
-    val productCategory: String,
+    var category: String = "",
 
     @SerializedName("thumbnail")
-    val productThumbnail: String,
+    var thumbnail: String = "",
 
     @SerializedName("images")
-    val productImages: List<String>
+    var images: List<String> = emptyList()
 )

@@ -30,7 +30,7 @@ fun OrderItem(order: Order, modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(8.dp))
 
         order.items.forEach { item ->
-            Text("${item.product.productTitle} x${item.quantity} — ${"%.2f".format(item.unitPrice)} DH (−${item.discountApplied.toInt()}%)")
+            Text("${item.product.title} x${item.quantity} — ${"%.2f".format(item.unitPrice)} DH (−${item.discountApplied.toInt()}%)")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
