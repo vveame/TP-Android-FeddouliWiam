@@ -12,9 +12,10 @@ import androidx.compose.ui.unit.dp
 import com.example.projectproduit.data.entities.Product
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
+import com.example.projectproduit.ui.cart.CartViewModel
 
 @Composable
-fun ProductList(products: List<Product>, onNavigateToDetails: (String) -> Unit){
+fun ProductList(products: List<Product>, onNavigateToDetails: (String) -> Unit, cartViewModel: CartViewModel){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -25,7 +26,10 @@ fun ProductList(products: List<Product>, onNavigateToDetails: (String) -> Unit){
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(products) { product ->
-                ProductItem(product, onNavigateToDetails)
+                ProductItem(product,
+                    onNavigateToDetails = onNavigateToDetails,
+                    cartViewModel = cartViewModel
+                )
             }
         }
     }

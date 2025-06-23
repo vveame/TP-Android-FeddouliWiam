@@ -9,8 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,9 +28,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.projectproduit.data.entities.Product
+import com.example.projectproduit.ui.cart.CartIntent
+import com.example.projectproduit.ui.cart.CartViewModel
 
 @Composable
-fun ProductItem(product: Product, onNavigateToDetails: (String) -> Unit) {
+fun ProductItem(
+    product: Product,
+    cartViewModel: CartViewModel,
+    onNavigateToDetails: (String) -> Unit
+) {
+
     val isOutOfStock = product.productStock <= 0
     val isLowStock = product.productStock in 1..9
 
@@ -117,6 +128,20 @@ fun ProductItem(product: Product, onNavigateToDetails: (String) -> Unit) {
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.End)
                 )
+            }
+
+            if (!isOutOfStock) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        cartViewModel.onIntent(CartIntent.AddToCart(product))
+                    },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Icon(Icons.Default.ShoppingCart, contentDescription = "Add to cart")
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Add to cart")
+                }
             }
         }
     }

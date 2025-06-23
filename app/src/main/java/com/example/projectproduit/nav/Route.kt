@@ -1,47 +1,28 @@
 package com.example.projectproduit.nav
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.NavType
-import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.projectproduit.R
+import com.example.projectproduit.ui.cart.CartViewModel
+import com.example.projectproduit.ui.cart.screen.CartScreen
 import com.example.projectproduit.ui.product.ProductViewModel
 import com.example.projectproduit.ui.product.component.ProductDetails
 import com.example.projectproduit.ui.product.screen.ProductHomeScreen
 import kotlinx.coroutines.launch
-import com.example.projectproduit.R
 
 object Routes {
     const val Home = "home"
@@ -50,10 +31,9 @@ object Routes {
     const val Profile = "profile"
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(viewModel: ProductViewModel) {
+fun AppNavigation(viewModel: ProductViewModel, cartViewModel: CartViewModel) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -64,7 +44,6 @@ fun AppNavigation(viewModel: ProductViewModel) {
 
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedBrand by rememberSaveable { mutableStateOf<String?>(null) }
-
     var categoryExpanded by remember { mutableStateOf(false) }
     var brandExpanded by remember { mutableStateOf(false) }
 
@@ -75,32 +54,19 @@ fun AppNavigation(viewModel: ProductViewModel) {
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                Text(
-                    text = "Glamora Market",
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(16.dp)
-                )
-
-                // Home Button
-                NavigationDrawerItem(
-                    label = { Text("Home") },
-                    selected = currentRoute == Routes.Home,
-                    onClick = {
-                        navController.navigate(Routes.Home) {
-                            popUpTo(0)
-                            launchSingleTop = true
-                        }
-                        scope.launch { drawerState.close() }
+                Text("Glamora Market", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(16.dp))
+                NavigationDrawerItem(label = { Text("Home") }, selected = currentRoute == Routes.Home, onClick = {
+                    navController.navigate(Routes.Home) {
+                        popUpTo(0); launchSingleTop = true
                     }
-                )
+                    scope.launch { drawerState.close() }
+                })
 
                 // Category Filter
                 ExposedDropdownMenuBox(
                     expanded = categoryExpanded,
                     onExpandedChange = { categoryExpanded = !categoryExpanded },
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
+                    modifier = Modifier.padding(16.dp).fillMaxWidth()
                 ) {
                     OutlinedTextField(
                         value = selectedCategory ?: "All",
@@ -114,22 +80,14 @@ fun AppNavigation(viewModel: ProductViewModel) {
                         expanded = categoryExpanded,
                         onDismissRequest = { categoryExpanded = false }
                     ) {
-                        DropdownMenuItem(
-                            text = { Text("All") },
-                            onClick = {
-                                selectedCategory = null
-                                categoryExpanded = false
-                            }
-                        )
+                        DropdownMenuItem(text = { Text("All") }, onClick = {
+                            selectedCategory = null; categoryExpanded = false
+                        })
                         categories.forEach { category ->
-                            DropdownMenuItem(
-                                text = { Text(category) },
-                                onClick = {
-                                    selectedCategory = category
-                                    categoryExpanded = false
-                                    scope.launch { drawerState.close() }
-                                }
-                            )
+                            DropdownMenuItem(text = { Text(category) }, onClick = {
+                                selectedCategory = category; categoryExpanded = false
+                                scope.launch { drawerState.close() }
+                            })
                         }
                     }
                 }
@@ -138,9 +96,7 @@ fun AppNavigation(viewModel: ProductViewModel) {
                 ExposedDropdownMenuBox(
                     expanded = brandExpanded,
                     onExpandedChange = { brandExpanded = !brandExpanded },
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
+                    modifier = Modifier.padding(16.dp).fillMaxWidth()
                 ) {
                     OutlinedTextField(
                         value = selectedBrand ?: "All",
@@ -154,37 +110,17 @@ fun AppNavigation(viewModel: ProductViewModel) {
                         expanded = brandExpanded,
                         onDismissRequest = { brandExpanded = false }
                     ) {
-                        DropdownMenuItem(
-                            text = { Text("All") },
-                            onClick = {
-                                selectedBrand = null
-                                brandExpanded = false
-                            }
-                        )
+                        DropdownMenuItem(text = { Text("All") }, onClick = {
+                            selectedBrand = null; brandExpanded = false
+                        })
                         brands.forEach { brand ->
-                            DropdownMenuItem(
-                                text = { Text(brand) },
-                                onClick = {
-                                    selectedBrand = brand
-                                    brandExpanded = false
-                                    scope.launch { drawerState.close() }
-                                }
-                            )
+                            DropdownMenuItem(text = { Text(brand) }, onClick = {
+                                selectedBrand = brand; brandExpanded = false
+                                scope.launch { drawerState.close() }
+                            })
                         }
                     }
                 }
-
-                // Cart & Profile (placeholder)
-                NavigationDrawerItem(
-                    label = { Text("Cart") },
-                    selected = false,
-                    onClick = { scope.launch { drawerState.close() } }
-                )
-                NavigationDrawerItem(
-                    label = { Text("Profile") },
-                    selected = false,
-                    onClick = { scope.launch { drawerState.close() } }
-                )
             }
         }
     ) {
@@ -192,23 +128,63 @@ fun AppNavigation(viewModel: ProductViewModel) {
             topBar = {
                 CenterAlignedTopAppBar(
                     title = { Text("Glamora Market", color = MaterialTheme.colorScheme.onPrimary) },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ),
                     navigationIcon = {
                         IconButton(onClick = {
                             scope.launch {
                                 if (drawerState.isClosed) drawerState.open() else drawerState.close()
                             }
                         }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.logo),
-                                contentDescription = "Menu",
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
+                            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = MaterialTheme.colorScheme.onPrimary)
                         }
-                    }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
                 )
+            },
+            bottomBar = {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    NavigationBarItem(
+                        selected = currentRoute == Routes.Cart,
+                        onClick = {
+                            navController.navigate(Routes.Cart) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Cart") },
+                        label = { Text("Cart") }
+                    )
+
+                    NavigationBarItem(
+                        selected = currentRoute == Routes.Home,
+                        onClick = {
+                            navController.navigate(Routes.Home) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = { Icon(painterResource(id = R.drawable.logo), contentDescription = "Home", modifier = Modifier.size(32.dp)) },
+                        label = { Text("Home") }
+                    )
+
+                    NavigationBarItem(
+                        selected = currentRoute == Routes.Profile,
+                        onClick = {
+                            navController.navigate(Routes.Profile) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+                        label = { Text("Profile") }
+                    )
+                }
             },
             containerColor = MaterialTheme.colorScheme.background
         ) { paddingValues ->
@@ -224,27 +200,26 @@ fun AppNavigation(viewModel: ProductViewModel) {
                         viewModel = viewModel,
                         selectedCategory = selectedCategory,
                         selectedBrand = selectedBrand,
+                        cartViewModel = cartViewModel,
                         onNavigateToDetails = { productId ->
                             navController.navigate("${Routes.ProductDetails}/$productId")
-                        }
+                        },
+                        modifier = Modifier.padding(paddingValues)
                     )
                 }
-
-                composable(
-                    "${Routes.ProductDetails}/{productId}",
-                    arguments = listOf(navArgument("productId") { type = NavType.StringType })
-                ) { backStackEntry ->
+                composable("${Routes.ProductDetails}/{productId}", arguments = listOf(navArgument("productId") { type = NavType.StringType })) { backStackEntry ->
                     val productId = backStackEntry.arguments?.getString("productId") ?: ""
                     ProductDetails(
                         productId = productId,
                         viewModel = viewModel,
-                        onNavigateToHome = {
-                            navController.navigate(Routes.Home) {
-                                popUpTo(0)
-                                launchSingleTop = true
-                            }
-                        }
+                        cartViewModel = cartViewModel
                     )
+                }
+                composable(Routes.Cart) {
+                    CartScreen(viewModel = cartViewModel)
+                }
+                composable(Routes.Profile) {
+                    Text("Profile Screen (to implement)", Modifier.padding(16.dp))
                 }
             }
         }

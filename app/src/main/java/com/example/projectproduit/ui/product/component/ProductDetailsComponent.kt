@@ -8,7 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +24,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.projectproduit.ui.cart.CartIntent
+import com.example.projectproduit.ui.cart.CartViewModel
 import com.example.projectproduit.ui.product.ProductIntent
 import com.example.projectproduit.ui.product.ProductViewModel
 
@@ -25,9 +33,10 @@ import com.example.projectproduit.ui.product.ProductViewModel
 fun ProductDetails(
     productId: String,
     viewModel: ProductViewModel,
-    onNavigateToHome: () -> Unit
+    cartViewModel: CartViewModel,
 ) {
     val state by viewModel.state.collectAsState()
+    val scrollState = rememberScrollState()
 
     // Load product by ID once
     LaunchedEffect(productId) {
@@ -38,6 +47,7 @@ fun ProductDetails(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background)
     ) {
         when {
@@ -59,7 +69,7 @@ fun ProductDetails(
 
                 // Image
                 ProductImageSlider(
-                    images = product.productImages?.takeIf { it.isNotEmpty() } ?: listOf(product.productThumbnail)
+                    images = product.productImages.takeIf { it.isNotEmpty() } ?: listOf(product.productThumbnail)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -138,12 +148,16 @@ fun ProductDetails(
                     Spacer(modifier = Modifier.weight(1f))
 
                     Button(
-                        onClick = onNavigateToHome,
+                        onClick = {
+                            cartViewModel.onIntent(CartIntent.AddToCart(product))
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 16.dp)
+                            .padding(top = 8.dp)
                     ) {
-                        Text("Back to products")
+                        Icon(Icons.Default.ShoppingCart, contentDescription = "Add to cart")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Add to cart")
                     }
                 }
             }

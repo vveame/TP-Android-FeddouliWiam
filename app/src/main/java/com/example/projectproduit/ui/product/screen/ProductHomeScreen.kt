@@ -22,12 +22,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.example.projectproduit.ui.cart.CartViewModel
 
 @Composable
-fun ProductHomeScreen(viewModel: ProductViewModel,
-                      selectedCategory: String? = null,
-                      selectedBrand: String? = null,
-                      onNavigateToDetails: (String) -> Unit) {
+fun ProductHomeScreen(
+    viewModel: ProductViewModel,
+    cartViewModel: CartViewModel,
+    selectedCategory: String? = null,
+    selectedBrand: String? = null,
+    onNavigateToDetails: (String) -> Unit,
+    modifier: Modifier
+) {
     val state by viewModel.state.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
 
@@ -78,7 +83,7 @@ fun ProductHomeScreen(viewModel: ProductViewModel,
                     matchesCategory && matchesBrand && matchesSearch
                 }
 
-                ProductList(products = filteredProducts, onNavigateToDetails)
+                ProductList(products = filteredProducts, onNavigateToDetails, cartViewModel)
 
                 // Display products when fetch is success
                 // ProductList(products = state.products, onNavigateToDetails)
