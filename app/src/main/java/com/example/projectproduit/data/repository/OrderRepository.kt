@@ -1,26 +1,31 @@
 package com.example.projectproduit.data.repository
 
-import com.example.projectproduit.data.api.OrderApi
 import com.example.projectproduit.data.entities.Order
+
+import com.google.firebase.firestore.FirebaseFirestore
 import jakarta.inject.Inject
 
 class OrderRepository @Inject constructor(
-    private val api: OrderApi
+    private val firestore: FirebaseFirestore
 ) {
 
-    suspend fun getOrdersById(userId: String): List<Order> {
-        val orders = api.getOrders()
-        return orders.filter { it.userId == userId }
+    fun getOrdersById(userId: String, onResult: (List<Order>) -> Unit, onError: (Exception) -> Unit) {
+        firestore.collection("orders")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val orders = snapshot.toObjects(Order::class.java)
+                onResult(orders)
+            }
+            .addOnFailureListener { e ->
+                onError(e)
+            }
     }
 
-    suspend fun placeOrder(order: Order) {
-        try {
-            val response = api.placeOrder(order)
-            if (!response.isSuccessful) {
-                throw Exception("Failed to place order: ${response.code()}")
-            }
-        } catch (e: Exception) {
-            throw Exception("Order placement failed: ${e.message}")
-        }
+    fun placeOrder(order: Order, onSuccess: () -> Unit, onError: (Exception) -> Unit) {
+        firestore.collection("orders")
+            .add(order)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onError(e) }
     }
 }

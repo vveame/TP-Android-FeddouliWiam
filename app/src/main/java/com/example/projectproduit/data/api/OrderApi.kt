@@ -10,6 +10,6 @@ interface OrderApi {
     @GET("orders.json")
     suspend fun getOrders(): List<Order>
 
-    @POST
+    @POST("orders.json")
     suspend fun placeOrder(@Body order: Order): Response<Unit>
 }

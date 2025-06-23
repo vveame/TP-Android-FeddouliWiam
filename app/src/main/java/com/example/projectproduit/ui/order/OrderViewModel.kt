@@ -32,27 +32,28 @@ class OrderViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadOrders(userId: String) {
+    fun loadOrders(userId: String) {
         _state.value = _state.value.copy(isLoading = true, error = null)
-        try {
-            Log.d("order repo", "loadOrdersById")
-            val orders = repository.getOrdersById(userId)
-            _state.value = OrderViewState(isLoading = false, orders = orders)
-        } catch (e: Exception) {
-            Log.e("order repo", "Exception", e)
-            _state.value = OrderViewState(
-                isLoading = false,
-                error = e.message ?: "Error fetching orders"
-            )
-        }
+        repository.getOrdersById(
+            userId,
+            onResult = { orders ->
+                _state.value = OrderViewState(orders = orders)
+            },
+            onError = { e ->
+                _state.value = OrderViewState(error = e.message)
+            }
+        )
     }
 
-    private suspend fun placeOrder(order: Order) {
-        try {
-            repository.placeOrder(order)
-            // Optionally reload orders or update UI
-        } catch (e: Exception) {
-            Log.e("order repo", "Order placement failed", e)
-        }
+    fun placeOrder(order: Order) {
+        repository.placeOrder(
+            order,
+            onSuccess = {
+                // You can update the state if needed
+            },
+            onError = { e ->
+                // Handle error
+            }
+        )
     }
 }
