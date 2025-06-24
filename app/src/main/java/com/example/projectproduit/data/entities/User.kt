@@ -4,13 +4,13 @@ import com.google.gson.annotations.SerializedName
 
 data class User(
     @SerializedName("userId")
-    val userId: String,
+    val userId: String = "",
 
     @SerializedName("fullName")
-    val fullName: String,
+    val fullName: String = "",
 
     @SerializedName("email")
-    val email: String,
+    val email: String = "",
 
     @SerializedName("phoneNumber")
     val phoneNumber: String? = null,
@@ -24,3 +24,7 @@ data class User(
     @SerializedName("isVerified")
     val isVerified: Boolean = false
 )
+
+enum class UserFormMode {
+    SIGNUP, SIGNIN, EDIT
+}

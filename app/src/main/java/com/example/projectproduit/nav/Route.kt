@@ -17,12 +17,16 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.projectproduit.R
+import com.example.projectproduit.data.entities.UserFormMode
 import com.example.projectproduit.ui.cart.CartViewModel
 import com.example.projectproduit.ui.cart.screen.CartScreen
 import com.example.projectproduit.ui.order.OrderViewModel
 import com.example.projectproduit.ui.product.ProductViewModel
 import com.example.projectproduit.ui.product.component.ProductDetails
 import com.example.projectproduit.ui.product.screen.ProductHomeScreen
+import com.example.projectproduit.ui.user.UserViewModel
+import com.example.projectproduit.ui.user.screen.UserFormScreen
+import com.example.projectproduit.ui.user.screen.UserProfileScreen
 import kotlinx.coroutines.launch
 
 object Routes {
@@ -30,11 +34,18 @@ object Routes {
     const val ProductDetails = "product_details"
     const val Cart = "cart"
     const val Profile = "profile"
+    const val SignIn = "signIn"
+    const val SignUp = "signUp"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(viewModel: ProductViewModel, cartViewModel: CartViewModel, orderViewModel: OrderViewModel) {
+fun AppNavigation(viewModel: ProductViewModel,
+                  cartViewModel: CartViewModel,
+                  orderViewModel: OrderViewModel,
+                  userViewModel: UserViewModel,
+                  userId: String?) {
+
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -222,7 +233,30 @@ fun AppNavigation(viewModel: ProductViewModel, cartViewModel: CartViewModel, ord
                         orderViewModel = orderViewModel )
                 }
                 composable(Routes.Profile) {
-                    Text("Profile Screen (to implement)", Modifier.padding(16.dp))
+                    if (userId != null) {
+                        UserProfileScreen(userId = userId, viewModel = userViewModel, navController = navController)
+                    } else {
+                        LaunchedEffect(Unit) {
+                            navController.navigate(Routes.SignIn)
+                        }
+                    }
+                }
+                composable(Routes.SignIn) {
+                    UserFormScreen(mode = UserFormMode.SIGNIN, viewModel = userViewModel) {
+                        navController.navigate(Routes.Profile) {
+                            popUpTo(Routes.Home) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    }
+                }
+
+                composable(Routes.SignUp) {
+                    UserFormScreen(mode = UserFormMode.SIGNUP, viewModel = userViewModel) {
+                        navController.navigate(Routes.Profile) {
+                            popUpTo(Routes.Home) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    }
                 }
             }
         }

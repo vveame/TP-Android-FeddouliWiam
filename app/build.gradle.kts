@@ -76,4 +76,5 @@ dependencies {
     // Firebase BoM
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.auth.ktx)
 }
