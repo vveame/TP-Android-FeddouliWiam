@@ -21,6 +21,7 @@ import com.example.projectproduit.data.entities.UserFormMode
 import com.example.projectproduit.ui.cart.CartViewModel
 import com.example.projectproduit.ui.cart.screen.CartScreen
 import com.example.projectproduit.ui.order.OrderViewModel
+import com.example.projectproduit.ui.order.screen.CheckoutScreen
 import com.example.projectproduit.ui.product.ProductViewModel
 import com.example.projectproduit.ui.product.component.ProductDetails
 import com.example.projectproduit.ui.product.screen.ProductHomeScreen
@@ -33,6 +34,7 @@ object Routes {
     const val Home = "home"
     const val ProductDetails = "product_details"
     const val Cart = "cart"
+    const val Checkout = "checkout"
     const val Profile = "profile"
     const val SignIn = "signIn"
     const val SignUp = "signUp"
@@ -228,9 +230,34 @@ fun AppNavigation(viewModel: ProductViewModel,
                     )
                 }
                 composable(Routes.Cart) {
-                    CartScreen(viewModel = cartViewModel,
-                        userId = "test-user-id", // Replace with real logged-in user ID
-                        orderViewModel = orderViewModel )
+                    CartScreen(
+                        viewModel = cartViewModel,
+                        navToCheckout = {
+                            if (userId != null) {
+                                navController.navigate(Routes.Checkout)
+                            } else {
+                                navController.navigate(Routes.SignIn)
+                            }
+                        }
+                    )
+                }
+                composable(Routes.Checkout) {
+                    if (userId != null) {
+                        CheckoutScreen(
+                            cartViewModel = cartViewModel,
+                            orderViewModel = orderViewModel,
+                            userId = userId,
+                            onOrderPlaced = {
+                                navController.popBackStack(Routes.Home, inclusive = false)
+                            },
+                            onCancel = { navController.popBackStack(Routes.Cart, inclusive = false) }
+                        )
+                    } else {
+                        // Fallback just in case someone reaches the route manually
+                        LaunchedEffect(Unit) {
+                            navController.navigate(Routes.SignIn)
+                        }
+                    }
                 }
                 composable(Routes.Profile) {
                     if (userId != null) {

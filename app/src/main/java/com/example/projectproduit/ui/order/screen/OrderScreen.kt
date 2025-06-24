@@ -35,12 +35,12 @@ fun OrderScreen(viewModel: OrderViewModel, userId: String) {
             }
 
             state.error != null -> {
-                Text("Erreur : ${state.error}", color = MaterialTheme.colorScheme.error)
+                Text("Error : ${state.error}", color = MaterialTheme.colorScheme.error)
             }
 
             state.orders.isEmpty() -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Aucune commande.")
+                    Text("No orders.")
                 }
             }
 

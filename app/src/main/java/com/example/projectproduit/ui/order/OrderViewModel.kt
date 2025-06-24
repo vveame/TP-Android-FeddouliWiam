@@ -46,14 +46,29 @@ class OrderViewModel @Inject constructor(
     }
 
     fun placeOrder(order: Order) {
+        _state.value = _state.value.copy(isLoading = true, error = null)
+
         repository.placeOrder(
             order,
             onSuccess = {
-                // You can update the state if needed
+                val updatedOrders = _state.value.orders.toMutableList().apply {
+                    add(order)
+                }
+                _state.value = _state.value.copy(
+                    orders = updatedOrders,
+                    isLoading = false,
+                    error = null
+                )
+                Log.d("OrderViewModel", "Order placed and state updated.")
             },
             onError = { e ->
-                // Handle error
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    error = e.message
+                )
+                Log.e("OrderViewModel", "Order placement failed: ${e.message}")
             }
         )
     }
+
 }

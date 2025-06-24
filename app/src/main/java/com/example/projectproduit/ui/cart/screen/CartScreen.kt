@@ -1,6 +1,5 @@
 package com.example.projectproduit.ui.cart.screen
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,31 +21,14 @@ import androidx.compose.ui.unit.dp
 import com.example.projectproduit.ui.cart.CartViewModel
 import com.example.projectproduit.ui.cart.CartIntent
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalContext
-import com.example.projectproduit.data.entities.Address
-import com.example.projectproduit.data.entities.Order
-import com.example.projectproduit.data.entities.OrderItem
-import com.example.projectproduit.data.entities.OrderStatus
-import com.example.projectproduit.data.entities.PaymentMethod
 import com.example.projectproduit.ui.cart.component.CartItem
-import com.example.projectproduit.ui.order.OrderIntent
-import com.example.projectproduit.ui.order.OrderViewModel
-import kotlinx.coroutines.launch
-import java.util.Date
-import java.util.UUID
 
 @Composable
 fun CartScreen(viewModel: CartViewModel,
-               userId: String,
-               orderViewModel: OrderViewModel) {
+               navToCheckout: () -> Unit) {
 
     val cartState by viewModel.state.collectAsState()
-    val orderState by orderViewModel.state.collectAsState()
-
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         if (cartState.items.isEmpty()) {
@@ -94,33 +76,7 @@ fun CartScreen(viewModel: CartViewModel,
 
                 Button(
                     onClick = {
-                        val orderItems = cartState.items.map {
-                            OrderItem(
-                                product = it.product,
-                                quantity = it.quantity,
-                                unitPrice = it.product.price * (1 - (it.product.discountPercentage ?: 0.0) / 100),
-                                discountApplied = it.product.discountPercentage ?: 0.0
-                            )
-                        }
-
-                        val order = Order(
-                            orderId = UUID.randomUUID().toString(),
-                            orderDate = Date(),
-                            items = orderItems,
-                            totalAmount = cartState.totalPrice,
-                            shippingFee = 0.0,
-                            deliveryAddress = Address("Street X", "City", "00000", "Country"), // Replace with real or input
-                            paymentMethod = PaymentMethod.CASH_ON_DELIVERY,
-                            userId = "678auna",
-                            status = OrderStatus.PENDING
-                        )
-
-                        coroutineScope.launch {
-                            orderViewModel.onIntent(OrderIntent.PlaceOrder(order))
-                            viewModel.onIntent(CartIntent.ClearCart)
-
-                            Toast.makeText(context, "Order placed successfully", Toast.LENGTH_SHORT).show()
-                        }
+                        navToCheckout()
                     },
                     enabled = cartState.items.isNotEmpty()
                 ) {
