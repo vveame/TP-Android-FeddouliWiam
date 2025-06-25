@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.projectproduit.data.entities.Product
 import com.google.firebase.firestore.FirebaseFirestore
 import jakarta.inject.Inject
+import java.util.Date
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -38,4 +39,36 @@ class ProductRepository @Inject constructor(
                 cont.resumeWithException(exception)
             }
     }
+
+    fun updateProductStock(
+        productId: String,
+        newStock: Int,
+        restockDate: Date?,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        val updates = hashMapOf<String, Any>(
+            "stock" to newStock
+        )
+        restockDate?.let {
+            updates["restockDate"] = it
+        }
+
+        firestore.collection("products")
+            .document(productId)
+            .update(updates)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onError(e) }
+    }
+
+    suspend fun getProductStockById(productId: String): Int = suspendCoroutine { cont ->
+        firestore.collection("products").document(productId)
+            .get()
+            .addOnSuccessListener { doc ->
+                val stock = doc.getLong("stock")?.toInt() ?: 0
+                cont.resume(stock)
+            }
+            .addOnFailureListener { cont.resumeWithException(it) }
+    }
+
 }

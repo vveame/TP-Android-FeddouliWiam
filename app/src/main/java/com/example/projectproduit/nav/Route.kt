@@ -26,6 +26,8 @@ import com.example.projectproduit.ui.order.screen.OrderScreen
 import com.example.projectproduit.ui.product.ProductViewModel
 import com.example.projectproduit.ui.product.component.ProductDetails
 import com.example.projectproduit.ui.product.screen.ProductHomeScreen
+import com.example.projectproduit.ui.product.screen.StockManagementScreen
+import com.example.projectproduit.ui.user.UserIntent
 import com.example.projectproduit.ui.user.UserViewModel
 import com.example.projectproduit.ui.user.screen.UserFormScreen
 import com.example.projectproduit.ui.user.screen.UserProfileScreen
@@ -33,6 +35,7 @@ import kotlinx.coroutines.launch
 
 object Routes {
     const val Home = "home"
+    const val StockManagement = "stock_management"
     const val ProductDetails = "product_details"
     const val Cart = "cart"
     const val Orders = "orders"
@@ -45,7 +48,7 @@ object Routes {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(viewModel: ProductViewModel,
+fun AppNavigation(productViewModel: ProductViewModel,
                   cartViewModel: CartViewModel,
                   orderViewModel: OrderViewModel,
                   userViewModel: UserViewModel,
@@ -55,9 +58,9 @@ fun AppNavigation(viewModel: ProductViewModel,
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    val state by viewModel.state.collectAsState()
-    val categories = state.products.map { it.category }.distinct().sorted()
-    val brands = state.products.map { it.brand }.distinct().sorted()
+    val productState by productViewModel.state.collectAsState()
+    val categories = productState.products.map { it.category }.distinct().sorted()
+    val brands = productState.products.map { it.brand }.distinct().sorted()
 
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedBrand by rememberSaveable { mutableStateOf<String?>(null) }
@@ -66,6 +69,13 @@ fun AppNavigation(viewModel: ProductViewModel,
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
+
+    val userState by userViewModel.state.collectAsState()
+    val isAdmin = userState.isAdmin == true
+
+    LaunchedEffect(userId) {
+        userId?.let { userViewModel.handleIntent(UserIntent.CheckIfAdmin(it)) }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -204,6 +214,21 @@ fun AppNavigation(viewModel: ProductViewModel,
                         )
                     }
 
+                    if (userId != null && isAdmin) {
+                        NavigationBarItem(
+                            selected = currentRoute == Routes.StockManagement,
+                            onClick = {
+                                navController.navigate(Routes.StockManagement) {
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            icon = { Icon(Icons.Default.Settings, contentDescription = "Stock") },
+                            label = { Text("Stock") }
+                        )
+                    }
+
                     NavigationBarItem(
                         selected = currentRoute == Routes.Profile,
                         onClick = {
@@ -229,7 +254,7 @@ fun AppNavigation(viewModel: ProductViewModel,
             ) {
                 composable(Routes.Home) {
                     ProductHomeScreen(
-                        viewModel = viewModel,
+                        viewModel = productViewModel,
                         selectedCategory = selectedCategory,
                         selectedBrand = selectedBrand,
                         cartViewModel = cartViewModel,
@@ -239,11 +264,24 @@ fun AppNavigation(viewModel: ProductViewModel,
                         modifier = Modifier.padding(paddingValues)
                     )
                 }
+                composable(Routes.StockManagement) {
+                    if (userId != null && isAdmin) {
+                        StockManagementScreen(
+                            viewModel = productViewModel,
+                            selectedCategory = selectedCategory,
+                            selectedBrand = selectedBrand
+                        )
+                    } else {
+                        LaunchedEffect(Unit) {
+                            navController.navigate(Routes.SignIn)
+                        }
+                    }
+                }
                 composable("${Routes.ProductDetails}/{productId}", arguments = listOf(navArgument("productId") { type = NavType.StringType })) { backStackEntry ->
                     val productId = backStackEntry.arguments?.getString("productId") ?: ""
                     ProductDetails(
                         productId = productId,
-                        viewModel = viewModel,
+                        viewModel = productViewModel,
                         cartViewModel = cartViewModel
                     )
                 }
@@ -272,6 +310,7 @@ fun AppNavigation(viewModel: ProductViewModel,
                 composable(Routes.Checkout) {
                     if (userId != null) {
                         CheckoutScreen(
+                            productViewModel = productViewModel,
                             cartViewModel = cartViewModel,
                             orderViewModel = orderViewModel,
                             userId = userId,

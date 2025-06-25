@@ -46,9 +46,12 @@ fun CartScreen(viewModel: CartViewModel,
                         item = item,
                         onRemove = { viewModel.onIntent(CartIntent.RemoveFromCart(item.product.id)) },
                         onQuantityChange = { qty ->
+                            val maxStock = item.product.stock
+                            val newQty = qty.coerceIn(1, maxStock)
+
                             viewModel.onIntent(
-                                if (qty > 0)
-                                    CartIntent.ChangeQuantity(item.product.id, qty)
+                                if (newQty > 0)
+                                    CartIntent.ChangeQuantity(item.product.id, newQty)
                                 else
                                     CartIntent.RemoveFromCart(item.product.id)
                             )

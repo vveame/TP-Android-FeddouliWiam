@@ -63,7 +63,14 @@ fun CartItem(
             IconButton(onClick = { onQuantityChange(item.quantity - 1) }) {
                 Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Decrease")
             }
-            IconButton(onClick = { onQuantityChange(item.quantity + 1) }) {
+            IconButton(
+                onClick = {
+                    if (item.quantity < item.product.stock) {
+                        onQuantityChange(item.quantity + 1)
+                    }
+                },
+                enabled = item.quantity < item.product.stock
+            ) {
                 Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Increase")
             }
             IconButton(onClick = onRemove) {

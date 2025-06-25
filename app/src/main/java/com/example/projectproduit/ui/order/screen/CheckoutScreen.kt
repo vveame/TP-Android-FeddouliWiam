@@ -41,12 +41,14 @@ import com.example.projectproduit.ui.order.OrderViewModel
 import java.util.UUID
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import com.example.projectproduit.ui.product.ProductViewModel
 import kotlinx.coroutines.launch
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckoutScreen(
+    productViewModel: ProductViewModel,
     cartViewModel: CartViewModel,
     orderViewModel: OrderViewModel,
     userId: String,
@@ -178,6 +180,7 @@ fun CheckoutScreen(
 
                 coroutineScope.launch {
                     orderViewModel.onIntent(OrderIntent.PlaceOrder(order))
+                    productViewModel.reduceStockAfterOrder(orderItems)
                     cartViewModel.onIntent(CartIntent.ClearCart)
                     Toast.makeText(context, "Order placed successfully", Toast.LENGTH_SHORT).show()
                     onOrderPlaced()

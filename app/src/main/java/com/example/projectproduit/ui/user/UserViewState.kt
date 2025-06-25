@@ -7,5 +7,6 @@ data class UserViewState(
     val currentUser: User? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isAuthenticated: Boolean = false
+    val isAuthenticated: Boolean = false,
+    val isAdmin: Boolean = false
 )

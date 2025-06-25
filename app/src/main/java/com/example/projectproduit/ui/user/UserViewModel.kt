@@ -2,6 +2,7 @@ package com.example.projectproduit.ui.user
 
 import androidx.lifecycle.ViewModel
 import com.example.projectproduit.data.entities.User
+import com.example.projectproduit.data.entities.UserRole
 import com.example.projectproduit.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -28,6 +29,7 @@ class UserViewModel @Inject constructor(
             is UserIntent.SignIn -> signIn(intent.email, intent.password)
             is UserIntent.SignUp -> signUp(intent.user, intent.password)
             is UserIntent.SignOut -> signOut()
+            is UserIntent.CheckIfAdmin -> checkIfAdmin(intent.userId)
         }
     }
 
@@ -117,5 +119,13 @@ class UserViewModel @Inject constructor(
     private fun signOut() {
         userRepository.signOutUser()
         _state.update { it.copy(currentUser = null, isAuthenticated = false) }
+    }
+
+    private fun checkIfAdmin(userId: String) {
+        val user = _state.value.users.find { it.userId == userId }
+            ?: _state.value.currentUser?.takeIf { it.userId == userId }
+
+        val isAdmin = user?.role == UserRole.ADMIN
+        _state.update { it.copy(isAdmin = isAdmin) }
     }
 }
