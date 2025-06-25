@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import com.example.projectproduit.data.entities.UserRole
 import com.example.projectproduit.ui.user.UserViewState
 
 @Composable
@@ -122,7 +123,8 @@ fun SignUpForm(
                 val user = User(
                     userId = UUID.randomUUID().toString(),
                     fullName = fullName,
-                    email = trimmedEmail
+                    email = trimmedEmail,
+                    role = UserRole.CUSTOMER
                 )
 
                 viewModel.handleIntent(UserIntent.SignUp(user, password))

@@ -21,10 +21,14 @@ data class User(
     @SerializedName("createdAt")
     val createdAt: Long = System.currentTimeMillis(),
 
-    @SerializedName("isVerified")
-    val isVerified: Boolean = false
+    @SerializedName("userRole")
+    val role: UserRole = UserRole.CUSTOMER,
 )
 
 enum class UserFormMode {
     SIGNUP, SIGNIN, EDIT
+}
+
+enum class UserRole {
+    ADMIN, CUSTOMER, DELIVERY
 }

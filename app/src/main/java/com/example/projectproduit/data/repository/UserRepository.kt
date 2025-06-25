@@ -27,7 +27,7 @@ class UserRepository @Inject constructor(
                     "email" to user.email,
                     "phoneNumber" to user.phoneNumber,
                     "address" to user.address,
-                    "isVerified" to user.isVerified
+                    "role" to user.role.name
                 )
             )
             .addOnSuccessListener { onSuccess() }

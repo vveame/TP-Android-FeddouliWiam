@@ -36,6 +36,7 @@ object Routes {
     const val Cart = "cart"
     const val Checkout = "checkout"
     const val Profile = "profile"
+    const val ProfileEdit = "profile/edit"
     const val SignIn = "signIn"
     const val SignUp = "signUp"
 }
@@ -267,6 +268,22 @@ fun AppNavigation(viewModel: ProductViewModel,
                             navController.navigate(Routes.SignIn)
                         }
                     }
+                }
+                composable("${Routes.ProfileEdit}/{userId}",
+                    arguments = listOf(navArgument("userId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val id = backStackEntry.arguments?.getString("userId")
+                    UserFormScreen(
+                        mode = UserFormMode.EDIT,
+                        userId = id,
+                        viewModel = userViewModel,
+                        onSuccess = {
+                            navController.navigate(Routes.Profile) {
+                                popUpTo(Routes.Home) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        }
+                    )
                 }
                 composable(Routes.SignIn) {
                     UserFormScreen(mode = UserFormMode.SIGNIN, viewModel = userViewModel) {
