@@ -17,6 +17,7 @@ fun UserFormScreen(
     mode: UserFormMode,
     userId: String? = null,
     viewModel: UserViewModel,
+    onBack: () -> Unit = {},
     onSuccess: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
@@ -38,6 +39,7 @@ fun UserFormScreen(
         UserFormMode.EDIT -> UserUpdateForm(
             userId = userId,
             viewModel = viewModel,
+            onBack = onBack,
             onSaveSuccess = onSuccess
         )
     }

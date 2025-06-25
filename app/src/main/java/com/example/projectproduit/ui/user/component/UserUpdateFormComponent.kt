@@ -1,18 +1,22 @@
 package com.example.projectproduit.ui.user.component
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,7 +24,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.projectproduit.data.entities.User
@@ -34,10 +37,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.example.projectproduit.data.entities.Address
 import com.example.projectproduit.data.entities.UserRole
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserUpdateForm(
     userId: String?,
     viewModel: UserViewModel,
+    onBack: () -> Unit,
     onSaveSuccess: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
@@ -138,15 +143,25 @@ fun UserUpdateForm(
 
             var expanded by remember { mutableStateOf(false) }
 
-            Box(modifier = Modifier.fillMaxWidth()) {
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded },
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 OutlinedTextField(
                     value = role.name,
                     onValueChange = {},
-                    label = { Text("Role") },
                     readOnly = true,
-                    modifier = Modifier.fillMaxWidth().clickable { expanded = true }
+                    label = { Text("Role") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                    },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
                 )
-                DropdownMenu(
+
+                ExposedDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {
@@ -163,35 +178,47 @@ fun UserUpdateForm(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
-            onClick = {
-                val user = User(
-                    userId = userId ?: UUID.randomUUID().toString(),
-                    fullName = fullName,
-                    email = if (currentUser?.role == UserRole.ADMIN) email else currentUser?.email ?: "",
-                    phoneNumber = phone,
-                    address = Address(
-                        street = street,
-                        city = city,
-                        postalCode = postalCode,
-                        country = country
-                    ),
-                    role = if (currentUser?.role == UserRole.ADMIN) role else currentUser?.role ?: UserRole.CUSTOMER
-                )
-
-                if (userId.isNullOrEmpty()) {
-                    viewModel.handleIntent(UserIntent.AddUser(user))
-                } else {
-                    viewModel.handleIntent(UserIntent.UpdateUser(user))
-                }
-
-                onSaveSuccess()
-            },
-            modifier = Modifier.align(Alignment.End)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
         ) {
-            Text("Save")
+            OutlinedButton(
+                onClick = onBack,
+            ) {
+                Text("Back")
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Button(
+                onClick = {
+                    val user = User(
+                        userId = userId ?: UUID.randomUUID().toString(),
+                        fullName = fullName,
+                        email = if (currentUser?.role == UserRole.ADMIN) email else currentUser?.email ?: "",
+                        phoneNumber = phone,
+                        address = Address(
+                            street = street,
+                            city = city,
+                            postalCode = postalCode,
+                            country = country
+                        ),
+                        role = if (currentUser?.role == UserRole.ADMIN) role else currentUser?.role ?: UserRole.CUSTOMER
+                    )
+
+                    if (userId.isNullOrEmpty()) {
+                        viewModel.handleIntent(UserIntent.AddUser(user))
+                    } else {
+                        viewModel.handleIntent(UserIntent.UpdateUser(user))
+                    }
+
+                    onSaveSuccess()
+                }
+            ) {
+                Text("Save")
+            }
         }
     }
 }

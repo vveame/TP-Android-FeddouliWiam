@@ -10,10 +10,10 @@ import com.example.projectproduit.data.entities.Order
 import androidx.compose.foundation.lazy.items
 
 @Composable
-fun OrderList(orders: List<Order>, modifier: Modifier = Modifier) {
+fun OrderList(orders: List<Order>,  onOrderClick: (Order) -> Unit, modifier: Modifier = Modifier) {
     LazyColumn(modifier = modifier) {
         items(orders, key = { it.orderId }) { order ->
-            OrderItem(order = order)
+            OrderItem(order = order, onClick = onOrderClick)
             Spacer(modifier = Modifier.height(12.dp))
         }
     }

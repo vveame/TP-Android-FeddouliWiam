@@ -22,6 +22,7 @@ import com.example.projectproduit.ui.cart.CartViewModel
 import com.example.projectproduit.ui.cart.screen.CartScreen
 import com.example.projectproduit.ui.order.OrderViewModel
 import com.example.projectproduit.ui.order.screen.CheckoutScreen
+import com.example.projectproduit.ui.order.screen.OrderScreen
 import com.example.projectproduit.ui.product.ProductViewModel
 import com.example.projectproduit.ui.product.component.ProductDetails
 import com.example.projectproduit.ui.product.screen.ProductHomeScreen
@@ -34,6 +35,7 @@ object Routes {
     const val Home = "home"
     const val ProductDetails = "product_details"
     const val Cart = "cart"
+    const val Orders = "orders"
     const val Checkout = "checkout"
     const val Profile = "profile"
     const val ProfileEdit = "profile/edit"
@@ -187,6 +189,21 @@ fun AppNavigation(viewModel: ProductViewModel,
                         label = { Text("Home") }
                     )
 
+                    if (userId != null) {
+                        NavigationBarItem(
+                            selected = currentRoute == Routes.Orders,
+                            onClick = {
+                                navController.navigate(Routes.Orders) {
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            icon = { Icon(Icons.Default.Favorite, contentDescription = "My Orders") },
+                            label = { Text("Orders") }
+                        )
+                    }
+
                     NavigationBarItem(
                         selected = currentRoute == Routes.Profile,
                         onClick = {
@@ -242,6 +259,16 @@ fun AppNavigation(viewModel: ProductViewModel,
                         }
                     )
                 }
+                composable(Routes.Orders) {
+                    if (userId != null) {
+                        OrderScreen(viewModel = orderViewModel, userId = userId)
+                    } else {
+                        // Redirect unauthenticated users
+                        LaunchedEffect(Unit) {
+                            navController.navigate(Routes.SignIn)
+                        }
+                    }
+                }
                 composable(Routes.Checkout) {
                     if (userId != null) {
                         CheckoutScreen(
@@ -277,6 +304,7 @@ fun AppNavigation(viewModel: ProductViewModel,
                         mode = UserFormMode.EDIT,
                         userId = id,
                         viewModel = userViewModel,
+                        onBack = { navController.popBackStack() },
                         onSuccess = {
                             navController.navigate(Routes.Profile) {
                                 popUpTo(Routes.Home) { inclusive = false }

@@ -17,10 +17,16 @@ import com.example.projectproduit.ui.order.OrderIntent
 import com.example.projectproduit.ui.order.OrderViewModel
 import com.example.projectproduit.ui.order.component.OrderList
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.projectproduit.data.entities.Order
+import com.example.projectproduit.ui.order.component.OrderDetails
 
 @Composable
 fun OrderScreen(viewModel: OrderViewModel, userId: String) {
     val state by viewModel.state.collectAsState()
+    var selectedOrder by remember { mutableStateOf<Order?>(null) }
 
     LaunchedEffect(userId) {
         viewModel.onIntent(OrderIntent.LoadOrders(userId))
@@ -28,6 +34,10 @@ fun OrderScreen(viewModel: OrderViewModel, userId: String) {
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         when {
+            selectedOrder != null -> {
+                OrderDetails(order = selectedOrder!!, onBack = { selectedOrder = null })
+            }
+
             state.isLoading -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -45,7 +55,7 @@ fun OrderScreen(viewModel: OrderViewModel, userId: String) {
             }
 
             else -> {
-                OrderList(orders = state.orders)
+                OrderList(orders = state.orders, onOrderClick = { selectedOrder = it })
             }
         }
     }
