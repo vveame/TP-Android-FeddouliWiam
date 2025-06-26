@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.projectproduit.R
 import com.example.projectproduit.data.entities.UserFormMode
+import com.example.projectproduit.ui.AdminScreen
 import com.example.projectproduit.ui.cart.CartViewModel
 import com.example.projectproduit.ui.cart.screen.CartScreen
 import com.example.projectproduit.ui.order.OrderViewModel
@@ -31,6 +32,7 @@ import com.example.projectproduit.ui.user.UserIntent
 import com.example.projectproduit.ui.user.UserViewModel
 import com.example.projectproduit.ui.user.screen.UserFormScreen
 import com.example.projectproduit.ui.user.screen.UserProfileScreen
+import com.example.projectproduit.ui.user.screen.UsersHomeScreen
 import kotlinx.coroutines.launch
 
 object Routes {
@@ -44,6 +46,8 @@ object Routes {
     const val ProfileEdit = "profile/edit"
     const val SignIn = "signIn"
     const val SignUp = "signUp"
+    const val Admin = "admin"
+    const val UserList = "user_list"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -216,26 +220,32 @@ fun AppNavigation(productViewModel: ProductViewModel,
 
                     if (userId != null && isAdmin) {
                         NavigationBarItem(
-                            selected = currentRoute == Routes.StockManagement,
+                            selected = currentRoute == Routes.Admin,
                             onClick = {
-                                navController.navigate(Routes.StockManagement) {
+                                navController.navigate(Routes.Admin) {
                                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
                                 }
                             },
-                            icon = { Icon(Icons.Default.Settings, contentDescription = "Stock") },
-                            label = { Text("Stock") }
+                            icon = { Icon(Icons.Default.Settings, contentDescription = "Admin") },
+                            label = { Text("Admin") }
                         )
                     }
 
                     NavigationBarItem(
-                        selected = currentRoute == Routes.Profile,
+                        selected = currentRoute?.startsWith(Routes.Profile) == true,
                         onClick = {
-                            navController.navigate(Routes.Profile) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
+                            if (userId != null) {
+                                navController.navigate("${Routes.Profile}/$userId") {
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            } else {
+                                navController.navigate(Routes.SignIn) {
+                                    popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                                }
                             }
                         },
                         icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
@@ -326,13 +336,25 @@ fun AppNavigation(productViewModel: ProductViewModel,
                         }
                     }
                 }
-                composable(Routes.Profile) {
-                    if (userId != null) {
-                        UserProfileScreen(userId = userId, viewModel = userViewModel, navController = navController)
-                    } else {
+                composable(
+                    route = "${Routes.Profile}/{userId}",
+                    arguments = listOf(navArgument("userId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val userIdArg = backStackEntry.arguments?.getString("userId")
+
+                    if (userIdArg == null) {
+                        // If userId is null, redirect to SignIn
                         LaunchedEffect(Unit) {
-                            navController.navigate(Routes.SignIn)
+                            navController.navigate(Routes.SignIn) {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            }
                         }
+                    } else {
+                        UserProfileScreen(
+                            userId = userIdArg,
+                            viewModel = userViewModel,
+                            navController = navController
+                        )
                     }
                 }
                 composable("${Routes.ProfileEdit}/{userId}",
@@ -345,27 +367,54 @@ fun AppNavigation(productViewModel: ProductViewModel,
                         viewModel = userViewModel,
                         onBack = { navController.popBackStack() },
                         onSuccess = {
-                            navController.navigate(Routes.Profile) {
-                                popUpTo(Routes.Home) { inclusive = false }
-                                launchSingleTop = true
+                            userId?.let {
+                                navController.navigate("${Routes.Profile}/$it") {
+                                    popUpTo(Routes.Home) { inclusive = false }
+                                    launchSingleTop = true
+                                }
                             }
+
                         }
                     )
                 }
                 composable(Routes.SignIn) {
                     UserFormScreen(mode = UserFormMode.SIGNIN, viewModel = userViewModel) {
-                        navController.navigate(Routes.Profile) {
-                            popUpTo(Routes.Home) { inclusive = false }
-                            launchSingleTop = true
+                        val id = userViewModel.state.value.loggedInUser?.userId
+                        id?.let {
+                            navController.navigate("${Routes.Profile}/$it") {
+                                popUpTo(Routes.Home) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+                }
+                composable(Routes.SignUp) {
+                    UserFormScreen(mode = UserFormMode.SIGNUP, viewModel = userViewModel) {
+                        val id = userViewModel.state.value.loggedInUser?.userId
+                        id?.let {
+                            navController.navigate("${Routes.Profile}/$it") {
+                                popUpTo(Routes.Home) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+                }
+                composable(Routes.Admin) {
+                    if (isAdmin) {
+                        AdminScreen(navController)
+                    } else {
+                        LaunchedEffect(Unit) {
+                            navController.navigate(Routes.SignIn)
                         }
                     }
                 }
 
-                composable(Routes.SignUp) {
-                    UserFormScreen(mode = UserFormMode.SIGNUP, viewModel = userViewModel) {
-                        navController.navigate(Routes.Profile) {
-                            popUpTo(Routes.Home) { inclusive = false }
-                            launchSingleTop = true
+                composable(Routes.UserList) {
+                    if (isAdmin) {
+                        UsersHomeScreen(viewModel = userViewModel, navController = navController)
+                    } else {
+                        LaunchedEffect(Unit) {
+                            navController.navigate(Routes.SignIn)
                         }
                     }
                 }

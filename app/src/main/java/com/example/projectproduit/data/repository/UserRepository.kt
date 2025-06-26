@@ -4,6 +4,10 @@ import com.example.projectproduit.data.entities.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import jakarta.inject.Inject
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class UserRepository @Inject constructor(
     firestore: FirebaseFirestore,
@@ -12,14 +16,7 @@ class UserRepository @Inject constructor(
 
     private val userCollection = firestore.collection("users")
 
-    fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        userCollection.document(user.userId)
-            .set(user)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { onFailure(it) }
-    }
-
-    fun updateUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    suspend fun updateUser(user: User) = suspendCancellableCoroutine<Unit> { cont ->
         userCollection.document(user.userId)
             .update(
                 mapOf(
@@ -30,66 +27,63 @@ class UserRepository @Inject constructor(
                     "role" to user.role.name
                 )
             )
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { onFailure(it) }
+            .addOnSuccessListener { cont.resume(Unit) }
+            .addOnFailureListener { cont.resumeWithException(it) }
     }
 
-    fun deleteUser(userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        userCollection.document(userId)
-            .delete()
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { onFailure(it) }
-    }
-
-    fun getUserById(userId: String, onResult: (User?) -> Unit, onError: (Exception) -> Unit) {
+    suspend fun getUserById(userId: String): User? = suspendCoroutine { cont ->
         userCollection.document(userId)
             .get()
             .addOnSuccessListener { snapshot ->
                 val user = snapshot.toObject(User::class.java)
-                onResult(user)
+                cont.resume(user)
             }
-            .addOnFailureListener { onError(it) }
+            .addOnFailureListener { cont.resumeWithException(it) }
     }
 
-    fun getAllUsers(onResult: (List<User>) -> Unit, onError: (Exception) -> Unit) {
+    suspend fun getAllUsers(): List<User> = suspendCoroutine { cont ->
         userCollection.get()
             .addOnSuccessListener { result ->
                 val users = result.documents.mapNotNull { it.toObject(User::class.java) }
-                onResult(users)
+                cont.resume(users)
             }
-            .addOnFailureListener { onError(it) }
+            .addOnFailureListener { cont.resumeWithException(it) }
     }
 
-    fun signUp(user: User, password: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    suspend fun signUp(user: User, password: String): User = suspendCoroutine { cont ->
         firebaseAuth.createUserWithEmailAndPassword(user.email, password)
             .addOnSuccessListener { authResult ->
                 val userId = authResult.user?.uid ?: user.userId
                 val userWithId = user.copy(userId = userId)
-                addUser(userWithId, onSuccess, onFailure)
+                userCollection.document(userWithId.userId)
+                    .set(userWithId)
+                    .addOnSuccessListener { cont.resume(userWithId) }
+                    .addOnFailureListener { cont.resumeWithException(it) }
             }
-            .addOnFailureListener { onFailure(it) }
+            .addOnFailureListener { cont.resumeWithException(it) }
     }
 
-    fun signIn(email: String, password: String, onSuccess: (User) -> Unit, onFailure: (Exception) -> Unit) {
+    suspend fun signIn(email: String, password: String): User = suspendCoroutine { cont ->
         firebaseAuth.signInWithEmailAndPassword(email, password)
             .addOnSuccessListener { authResult ->
                 val userId = authResult.user?.uid
                 if (userId != null) {
-                    getUserById(userId, onResult = { user ->
-                        if (user != null) {
-                            onSuccess(user)
-                        } else {
-                            onFailure(Exception("User document not found"))
+                    userCollection.document(userId)
+                        .get()
+                        .addOnSuccessListener { doc ->
+                            val user = doc.toObject(User::class.java)
+                            if (user != null) cont.resume(user)
+                            else cont.resumeWithException(Exception("User document not found"))
                         }
-                    }, onError = onFailure)
+                        .addOnFailureListener { cont.resumeWithException(it) }
                 } else {
-                    onFailure(Exception("User ID not found"))
+                    cont.resumeWithException(Exception("User ID not found"))
                 }
             }
-            .addOnFailureListener { onFailure(it) }
+            .addOnFailureListener { cont.resumeWithException(it) }
     }
 
     fun signOutUser() {
-        FirebaseAuth.getInstance().signOut()
+        firebaseAuth.signOut()
     }
 }

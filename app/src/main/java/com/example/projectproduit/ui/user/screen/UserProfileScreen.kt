@@ -57,17 +57,18 @@ fun UserProfileScreen(
                 popUpTo(Routes.Home) { inclusive = true }
             }
         } else {
-            viewModel.handleIntent(UserIntent.FetchUser(userId))
+            viewModel.handleIntent(UserIntent.FetchUser(userId)) // fetch profile user only
         }
     }
 
-    val user = state.currentUser
+    val loggedInUser = state.loggedInUser
+    val viewedUser = state.viewedUser
 
     if (state.isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
-    } else if (user != null) {
+    } else if (viewedUser != null) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -86,14 +87,14 @@ fun UserProfileScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    ProfileItem(label = "Full Name", value = user.fullName, icon = Icons.Default.Person)
-                    ProfileItem(label = "Email", value = user.email, icon = Icons.Default.Email)
-                    ProfileItem(label = "Phone", value = user.phoneNumber ?: "Not specified", icon = Icons.Default.Phone)
-                    ProfileItem(label = "Address", value = user.address?.let {
+                    ProfileItem(label = "Full Name", value = viewedUser.fullName, icon = Icons.Default.Person)
+                    ProfileItem(label = "Email", value = viewedUser.email, icon = Icons.Default.Email)
+                    ProfileItem(label = "Phone", value = viewedUser.phoneNumber ?: "Not specified", icon = Icons.Default.Phone)
+                    ProfileItem(label = "Address", value = viewedUser.address?.let {
                         "${it.street}, ${it.city}, ${it.postalCode ?: ""}, ${it.country}"
                     } ?: "Not specified", icon = Icons.Default.Home)
-                    ProfileItem(label = "Role", value = user.role.name, icon = Icons.Default.Lock)
-                    ProfileItem(label = "Created at", value = DateFormat.getDateTimeInstance().format(Date(user.createdAt)), icon = Icons.Default.DateRange)
+                    ProfileItem(label = "Role", value = viewedUser.role.name, icon = Icons.Default.Lock)
+                    ProfileItem(label = "Created at", value = DateFormat.getDateTimeInstance().format(Date(viewedUser.createdAt)), icon = Icons.Default.DateRange)
                 }
             }
 
@@ -114,20 +115,22 @@ fun UserProfileScreen(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Button(
-                    onClick = { viewModel.handleIntent(UserIntent.SignOut) },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.Close, contentDescription = "Logout")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Logout", color = MaterialTheme.colorScheme.onError)
+                if (loggedInUser?.userId == userId) {
+                    Button(
+                        onClick = { viewModel.handleIntent(UserIntent.SignOut) },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = "Logout")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Logout", color = MaterialTheme.colorScheme.onError)
+                    }
                 }
             }
         }
     } else {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Error : ${state.error ?: "User nt found"}", color = MaterialTheme.colorScheme.error)
+            Text("Error : ${state.error ?: "User not found"}", color = MaterialTheme.colorScheme.error)
         }
     }
 }

@@ -57,7 +57,9 @@ fun UserUpdateForm(
     var country by rememberSaveable { mutableStateOf("") }
 
     var role by rememberSaveable { mutableStateOf(UserRole.CUSTOMER) }
-    val currentUser = state.currentUser
+
+    val loggedInUser = state.loggedInUser
+    val viewedUser = state.viewedUser
 
     LaunchedEffect(userId) {
         if (!userId.isNullOrEmpty()) {
@@ -65,8 +67,8 @@ fun UserUpdateForm(
         }
     }
 
-    LaunchedEffect(state.currentUser) {
-        state.currentUser?.let { user ->
+    LaunchedEffect(viewedUser) {
+        viewedUser?.let { user ->
             fullName = user.fullName
             email = user.email
             phone = user.phoneNumber ?: ""
@@ -137,7 +139,7 @@ fun UserUpdateForm(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (currentUser?.role == UserRole.ADMIN) {
+        if (loggedInUser?.role == UserRole.ADMIN) {
             Spacer(modifier = Modifier.height(16.dp))
             Text("User Role", style = MaterialTheme.typography.titleMedium)
 
@@ -194,10 +196,13 @@ fun UserUpdateForm(
 
             Button(
                 onClick = {
+                    val isAdmin = loggedInUser?.role == UserRole.ADMIN
+                    val isSelf = loggedInUser?.userId == viewedUser?.userId
+
                     val user = User(
-                        userId = userId ?: UUID.randomUUID().toString(),
+                        userId = viewedUser?.userId ?: UUID.randomUUID().toString(),
                         fullName = fullName,
-                        email = if (currentUser?.role == UserRole.ADMIN) email else currentUser?.email ?: "",
+                        email = if (isAdmin) email else loggedInUser?.email ?: "",
                         phoneNumber = phone,
                         address = Address(
                             street = street,
@@ -205,14 +210,10 @@ fun UserUpdateForm(
                             postalCode = postalCode,
                             country = country
                         ),
-                        role = if (currentUser?.role == UserRole.ADMIN) role else currentUser?.role ?: UserRole.CUSTOMER
+                        role = if (isAdmin) role else loggedInUser?.role ?: UserRole.CUSTOMER
                     )
 
-                    if (userId.isNullOrEmpty()) {
-                        viewModel.handleIntent(UserIntent.AddUser(user))
-                    } else {
-                        viewModel.handleIntent(UserIntent.UpdateUser(user))
-                    }
+                    viewModel.handleIntent(UserIntent.UpdateUser(user))
 
                     onSaveSuccess()
                 }

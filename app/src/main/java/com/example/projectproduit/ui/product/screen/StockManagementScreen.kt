@@ -59,7 +59,7 @@ fun StockManagementScreen(
                     items(filteredProducts) { product ->
                         StockItem(
                             product = product,
-                            onRestock = { amount -> viewModel.restockProduct(product.id, amount) },
+                            onRestock = { amount -> viewModel.restock(product.id, amount) },
                             onEmptyStock = { viewModel.emptyStock(product.id) }
                         )
                         Spacer(Modifier.height(12.dp))

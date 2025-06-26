@@ -1,9 +1,9 @@
 package com.example.projectproduit.data.repository
 
-import android.util.Log
 import com.example.projectproduit.data.entities.Product
 import com.google.firebase.firestore.FirebaseFirestore
 import jakarta.inject.Inject
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.Date
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -19,7 +19,6 @@ class ProductRepository @Inject constructor(
             .get()
             .addOnSuccessListener { result ->
                 val products = result.documents.mapNotNull { it.toObject(Product::class.java) }
-                Log.d("ProductRepository", "Fetched products: ${products.size}")
                 cont.resume(products)
             }
             .addOnFailureListener { exception ->
@@ -40,29 +39,34 @@ class ProductRepository @Inject constructor(
             }
     }
 
-    fun updateProductStock(
-        productId: String,
+    suspend fun updateProductStock(
+        id: String,
         newStock: Int,
-        restockDate: Date?,
-        onSuccess: () -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        val updates = hashMapOf<String, Any>(
-            "stock" to newStock
-        )
-        restockDate?.let {
-            updates["restockDate"] = it
-        }
+        restockDate: Date?
+    ): Unit = suspendCancellableCoroutine { cont ->
+        val updates = mutableMapOf<String, Any>("stock" to newStock)
+        restockDate?.let { updates["restockDate"] = it }
 
         firestore.collection("products")
-            .document(productId)
+            .document(id)
             .update(updates)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { e -> onError(e) }
+            .addOnSuccessListener { cont.resume(Unit) }
+            .addOnFailureListener { cont.resumeWithException(it) }
     }
 
-    suspend fun getProductStockById(productId: String): Int = suspendCoroutine { cont ->
-        firestore.collection("products").document(productId)
+    suspend fun decreaseProductStock(
+        id: String,
+        newStock: Int
+    ): Unit = suspendCancellableCoroutine { cont ->
+        firestore.collection("products")
+            .document(id)
+            .update("stock", newStock)
+            .addOnSuccessListener { cont.resume(Unit) }
+            .addOnFailureListener { cont.resumeWithException(it) }
+    }
+
+    suspend fun getProductStockById(id: String): Int = suspendCoroutine { cont ->
+        firestore.collection("products").document(id)
             .get()
             .addOnSuccessListener { doc ->
                 val stock = doc.getLong("stock")?.toInt() ?: 0
@@ -70,5 +74,4 @@ class ProductRepository @Inject constructor(
             }
             .addOnFailureListener { cont.resumeWithException(it) }
     }
-
 }

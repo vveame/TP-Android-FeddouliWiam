@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ProjectProduitTheme {
-                val userId = userViewModel.state.collectAsState().value.currentUser?.userId
+                val userId = userViewModel.state.collectAsState().value.loggedInUser?.userId
                 AppNavigation(productViewModel, cartViewModel, orderViewModel, userViewModel, userId)
             }
         }
