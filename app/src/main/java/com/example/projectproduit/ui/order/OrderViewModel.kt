@@ -20,55 +20,31 @@ class OrderViewModel @Inject constructor(
     val state: StateFlow<OrderViewState> = _state
 
     fun onIntent(intent: OrderIntent) {
-        when (intent) {
-            is OrderIntent.LoadOrders -> {
-                viewModelScope.launch {
-                    loadOrders(intent.userId)
-                }
-            }
-            is OrderIntent.PlaceOrder-> {
-                viewModelScope.launch { placeOrder(intent.order) }
+        viewModelScope.launch {
+            when (intent) {
+                is OrderIntent.LoadOrders -> loadOrders(intent.userId)
+                is OrderIntent.PlaceOrder -> placeOrder(intent.order)
             }
         }
     }
 
-    fun loadOrders(userId: String) {
+    private suspend fun loadOrders(userId: String) {
         _state.value = _state.value.copy(isLoading = true, error = null)
-        repository.getOrdersById(
-            userId,
-            onResult = { orders ->
-                _state.value = OrderViewState(orders = orders)
-            },
-            onError = { e ->
-                _state.value = OrderViewState(error = e.message)
-            }
-        )
+        try {
+            val orders = repository.getOrdersById(userId)
+            _state.value = _state.value.copy(isLoading = false, orders = orders)
+        } catch (e: Exception) {
+            _state.value = _state.value.copy(isLoading = false, error = e.message)
+        }
     }
 
-    fun placeOrder(order: Order) {
-        _state.value = _state.value.copy(isLoading = true, error = null)
-
-        repository.placeOrder(
-            order,
-            onSuccess = {
-                val updatedOrders = _state.value.orders.toMutableList().apply {
-                    add(order)
-                }
-                _state.value = _state.value.copy(
-                    orders = updatedOrders,
-                    isLoading = false,
-                    error = null
-                )
-                Log.d("OrderViewModel", "Order placed and state updated.")
-            },
-            onError = { e ->
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    error = e.message
-                )
-                Log.e("OrderViewModel", "Order placement failed: ${e.message}")
-            }
-        )
+    private suspend fun placeOrder(order: Order) {
+        try {
+            repository.placeOrder(order)
+            val updatedList = _state.value.orders + order
+            _state.value = _state.value.copy(orders = updatedList, error = null)
+        } catch (e: Exception) {
+            _state.value = _state.value.copy(error = e.message)
+        }
     }
-
 }

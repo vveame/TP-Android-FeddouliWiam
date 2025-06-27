@@ -10,6 +10,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -29,6 +30,8 @@ class ProductViewModel @Inject constructor(
                 is ProductIntent.LoadProductById -> loadProductById(intent.id)
                 is ProductIntent.RestockProduct -> restockProduct(intent.productId, intent.newStock, intent.restockDate)
                 is ProductIntent.DecreaseProductStock -> decreaseStock(intent.productId, intent.newStock)
+                is ProductIntent.ReduceStockAfterOrder -> reduceStockAfterOrder(intent.orderItems)
+                is ProductIntent.EmptyStock -> emptyStock(intent.productId)
             }
         }
     }
@@ -81,31 +84,35 @@ class ProductViewModel @Inject constructor(
         }
     }
 
-    fun reduceStockAfterOrder(orderItems: List<OrderItem>) {
-        viewModelScope.launch {
-            for (item in orderItems) {
-                try {
-                    val currentStock = repository.getProductStockById(item.product.id)
-                    val newStock = currentStock - item.quantity
-                    if (newStock >= 0) {
-                        handleIntent(ProductIntent.DecreaseProductStock(item.product.id, newStock))
-                    } else {
-                        Log.e("reduceStock", "Attempted to reduce below 0 for ${item.product.title}")
+    private suspend fun reduceStockAfterOrder(orderItems: List<OrderItem>) {
+        for (item in orderItems) {
+            try {
+                val currentStock = repository.getProductStockById(item.product.id)
+                val newStock = currentStock - item.quantity
+                if (newStock >= 0) {
+                    repository.decreaseProductStock(item.product.id, newStock)
+
+                    _state.update { current ->
+                        current.copy(
+                            products = current.products.map {
+                                if (it.id == item.product.id) {
+                                    it.copy(stock = newStock)
+                                } else {
+                                    it
+                                }
+                            }
+                        )
                     }
-                } catch (e: Exception) {
-                    Log.e("reduceStock", "Error fetching stock for ${item.product.title}: ${e.message}")
+                } else {
+                    Log.e("reduceStock", "Attempted to reduce below 0 for ${item.product.title}")
                 }
+            } catch (e: Exception) {
+                Log.e("reduceStock", "Error fetching stock for ${item.product.title}: ${e.message}")
             }
         }
     }
 
-    fun restock(productId: String, amountToAdd: Int) {
-        val product = _state.value.products.find { it.id == productId } ?: return
-        val newStock = product.stock + amountToAdd
-        handleIntent(ProductIntent.RestockProduct(productId, newStock, Date()))
-    }
-
-    fun emptyStock(productId: String) {
-        handleIntent(ProductIntent.RestockProduct(productId, 0, Date()))
+    private suspend fun emptyStock(productId: String) {
+        restockProduct(productId, 0, Date())
     }
 }

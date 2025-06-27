@@ -106,8 +106,4 @@ class UserViewModel @Inject constructor(
         val isAdmin = user?.role == UserRole.ADMIN
         _state.update { it.copy(isAdmin = isAdmin) }
     }
-
-    fun clearError() {
-        _state.update { it.copy(error = null) }
-    }
 }

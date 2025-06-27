@@ -21,6 +21,7 @@ import com.example.projectproduit.ui.product.component.StockItem
 import androidx.compose.runtime.getValue
 import com.example.projectproduit.ui.product.ProductIntent
 import androidx.compose.foundation.lazy.items
+import java.util.Date
 
 @Composable
 fun StockManagementScreen(
@@ -59,8 +60,21 @@ fun StockManagementScreen(
                     items(filteredProducts) { product ->
                         StockItem(
                             product = product,
-                            onRestock = { amount -> viewModel.restock(product.id, amount) },
-                            onEmptyStock = { viewModel.emptyStock(product.id) }
+                            onRestock = { amount ->
+                                val newStock = product.stock + amount
+                                viewModel.handleIntent(
+                                    ProductIntent.RestockProduct(
+                                        productId = product.id,
+                                        newStock = newStock,
+                                        restockDate = Date()
+                                    )
+                                )
+                            },
+                            onEmptyStock = {
+                                viewModel.handleIntent(
+                                    ProductIntent.EmptyStock(product.id)
+                                )
+                            }
                         )
                         Spacer(Modifier.height(12.dp))
                     }

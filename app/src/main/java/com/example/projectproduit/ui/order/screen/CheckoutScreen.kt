@@ -41,6 +41,7 @@ import com.example.projectproduit.ui.order.OrderViewModel
 import java.util.UUID
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import com.example.projectproduit.ui.product.ProductIntent
 import com.example.projectproduit.ui.product.ProductViewModel
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -178,13 +179,11 @@ fun CheckoutScreen(
                     status = OrderStatus.PENDING
                 )
 
-                coroutineScope.launch {
-                    orderViewModel.onIntent(OrderIntent.PlaceOrder(order))
-                    productViewModel.reduceStockAfterOrder(orderItems)
-                    cartViewModel.onIntent(CartIntent.ClearCart)
-                    Toast.makeText(context, "Order placed successfully", Toast.LENGTH_SHORT).show()
-                    onOrderPlaced()
-                }
+                orderViewModel.onIntent(OrderIntent.PlaceOrder(order))
+                productViewModel.handleIntent(ProductIntent.ReduceStockAfterOrder(orderItems))
+                cartViewModel.onIntent(CartIntent.ClearCart)
+                Toast.makeText(context, "Order placed successfully", Toast.LENGTH_SHORT).show()
+                onOrderPlaced()
             },
             enabled = cartState.items.isNotEmpty(),
             modifier = Modifier.fillMaxWidth()
